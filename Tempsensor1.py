@@ -3,6 +3,18 @@ import os
 import glob
 import time
 from tkinter import*
+import sys 
+import gpiozero 
+
+RELAY_PIN = 17#GPIO port 
+relay = gpiozero.OutputDevice(RELAY_PIN, active_high = False, inital_value = False)
+
+def RelayOO():
+    relay.on()
+    time.sleep(20)
+    relay.off()
+
+
  
 os.system('modprobe w1-gpio')
 os.system('modprobe w1-therm')
@@ -36,4 +48,5 @@ root.title('Low Cost Resuable Bioreactor UI')
 root.geometery('600x600')
 Templabel = Label(root, text ="")
 root.after(1000,read_temp)
+RelayOO()
 
