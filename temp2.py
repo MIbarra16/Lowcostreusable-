@@ -11,7 +11,7 @@ import time
 from tkinter import messagebox
 import datetime 
 import sys
-#import gpiozero
+import gpiozero
 import glob
 
 class settings:
@@ -231,23 +231,37 @@ def Customrun():
 def TempC():
     sensor = W1ThermSensor()
     
-    TempReading = sensor.get_temperature
-    TempR.config(top4, text= str(TempReading))
+    TempReading = sensor.get_temperature()
     
-    print(TempReading)
+    #TempRe.set=TempReading
+    print("The temperature is %s celsius" % TempReading)
+    TempR.config(text = float(TempReading))
+    top4.after(1000,TempC)
+    top4.update()
+    
 def TempD():
+    global TempReading, TempR
+    TempReading= StringVar()
     
-    
-    global TempR, TempReading
-    
-    
-    TempRH = StringVar()
     Templabel = Label(top4, text = "Tempature in Celsius")
     Templabel.place( x = 130 , y = 100)
-    TempR = Label(top4, text = ' ')
+    TempR = Label(top4, text = "0")
     TempR.place(x = 130, y =120)
+    
+    top4.after(1000, TempC)
     # TempRH.set("00")
-    top4.after(2000, TempC)
+# while temp > - 1: 
+#     if TempReading < int(set.temperature):
+#         RELAY_PIN = 17  
+#         relay = gpiozero.OutputDevice(RELAY_PIN, active_high = False, inital_value = False)
+#         relay.on()
+#         time.sleep(20)
+#         relay.off()
+#         print("Turn off relay")
+
+
+
+    
 
 
    #os.system('modprobe w1-gpio')
@@ -283,6 +297,7 @@ def TempD():
 #        return temp_c, temp_f
     
 def TimerD(): 
+    global temp 
     hour=StringVar()
     minute=StringVar()
     second=StringVar()
@@ -439,24 +454,3 @@ Helppagebutton1.pack()
 
 
 root.mainloop();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
