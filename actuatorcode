@@ -1,0 +1,55 @@
+#include <elapsedMillis.h>
+
+/* Firgelli Automations
+ * Limited or no support: we do not have the resources for Arduino code support
+ * 
+ * This progam controls the speed of a linear actuator via a potentiometer input 
+ */
+
+int RPWM = 10;    //connect Arduino pin 10 to IBT-2 pin RPWM
+int LPWM = 11;    //connect Arduino pin 11 to IBT-2 pin LPWM
+int potPin = A0;//analog pin that connects to centre potentiometer pin
+int actuatorPin = A5;
+int maxAnalogReading;
+int minAnalogReading;
+int actuatorfinal;
+int potentiometer;
+int Speed, sensorVal, actuatorVal;
+
+
+void setup() {
+  pinMode(RPWM, OUTPUT);
+  pinMode(LPWM, OUTPUT);
+  pinMode(potPin, INPUT);
+  pinMode(actuatorPin, INPUT_PULLUP);
+  Serial.begin(9600);
+}
+
+void loop() {  
+  sensorVal = analogRead(potPin);  //read user input from the potentiometer
+  actuatorVal = analogRead(actuatorPin);
+  actuatorfinal = ((actuatorVal-56)*25)/43;
+  potentiometer = (sensorVal*25)/1023;
+  
+  if(sensorVal >= 512){                 //extension ;
+    Speed = 50;
+    analogWrite(RPWM, 0);
+    analogWrite(LPWM, Speed);
+     Serial.println("Potentiometer Value: ");
+     Serial.println(sensorVal);
+     Serial.println("\tActuator Value: ");
+     Serial.println(actuatorVal);
+  delay(500);
+  }
+
+  else{                                 //retraction
+    Speed = 50;
+    analogWrite(RPWM, Speed);
+    analogWrite(LPWM, 0);
+  }
+     Serial.println("Potentiometer Value: ");
+     Serial.println(sensorVal);
+     Serial.println("\tActuator Value: ");
+     Serial.println(actuatorVal);
+  delay(500);
+}  
