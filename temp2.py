@@ -230,8 +230,14 @@ def Customrun():
 #        root.after(1000, timerf, total_seconds-1)
 def TempC():
     sensor = W1ThermSensor()
-    
-    TempReading = sensor.get_temperature()
+    RawHigh = 99.6
+    RawLow = 0.5 
+    ReferenceHigh = 99.9
+    ReferenceLow = 0 
+    RawRange = RawHigh -RawLow 
+    ReferenceRange = ReferenceHigh - ReferenceHigh
+    RawValue = sensor.get_temperature()
+    TempReading = (((RawValue-RawLow)*ReferenceRange)/RawRange)+ReferenceLow
     
     #TempRe.set=TempReading
     print("The temperature is %s celsius" % TempReading)
@@ -250,14 +256,7 @@ def TempD():
     
     top4.after(1000, TempC)
     # TempRH.set("00")
-# while temp > - 1: 
-#     if TempReading < int(set.temperature):
-#         RELAY_PIN = 17  
-#         relay = gpiozero.OutputDevice(RELAY_PIN, active_high = False, inital_value = False)
-#         relay.on()
-#         time.sleep(20)
-#         relay.off()
-#         print("Turn off relay")
+
 
 
 
@@ -359,7 +358,16 @@ def TimerD():
         # after every one sec the value of temp will be decremented
         # by one
         temp -= 1
-
+def HeatPad():
+     while temp > - 1: 
+        if (TempReading < int(set.temperature)):
+            RELAY_PIN = 17  
+            relay = gpiozero.OutputDevice(RELAY_PIN, active_high = False, inital_value = False)
+            relay.on()
+            print("Turn of relay")
+            time.sleep(20)
+            relay.off()
+            print("Turn off relay")
 def RunIT(): 
     global top4
     top4 = Toplevel()
@@ -368,10 +376,10 @@ def RunIT():
 
     t1 = threading.Thread(target = TimerD)
     t2 = threading.Thread(target = TempD)
-
+    t3 = threading.Thread(Target = HeatPad)
     t1.start()
     t2.start()
-
+    t3.start()
  #   t1.join()
  #   t2.join()
     #hour=StringVar()
