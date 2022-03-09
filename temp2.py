@@ -13,6 +13,9 @@ import datetime
 import sys
 import gpiozero
 import glob
+import csv 
+import numpy as np
+from datetime import datetime 
 
 class settings:
     def __init__(self):
@@ -25,6 +28,7 @@ class settings:
         self.tempread= 0;
         self.doread = 0;
         self.phread = 0;
+        
 
 sets = settings();
 
@@ -229,20 +233,39 @@ def Customrun():
 #        timerlabel.config(text = timer )
 #        root.after(1000, timerf, total_seconds-1)
 def TempC():
+    lock.aquire()
     sensor = W1ThermSensor()
-    
-    TempReading = sensor.get_temperature()
-    
+    RawHigh = 99.6
+    RawLow = 0.5 
+    ReferenceHigh = 99.9
+    ReferenceLow = 0 
+    RawRange = RawHigh - RawLow 
+    ReferenceRange = ReferenceHigh - ReferenceHigh
+    RawValue = sensor.get_temperature()
+    TempReading = (((RawValue-RawLow)*ReferenceRange)/RawRange)+ReferenceLow
     #TempRe.set=TempReading
     print("The temperature is %s celsius" % TempReading)
     TempR.config(text = float(TempReading))
-    top4.after(1000,TempC)
     top4.update()
+    i=1
+    while i >= 0:
+        dt = datetime.now()
+        fn = str(dt) + ".csv"
+        fn = fn.replace(":", "_")
+        fn = fn.replace(" ", "_")
+        fn = fn.replace("-", "_")
+    dtt =  datetime.now()
+    x = [dtt, TempReading]
+    with open(fn, 'a', newline='') as y:
+        writer = csv.writer(y, dialect='excel')
+        writer.writerows(x)
+    lock.release()
+    top4.after(1000,TempC)
     
+
 def TempD():
     global TempReading, TempR
-    TempReading= StringVar()
-    
+    TempReading = StringVar()
     Templabel = Label(top4, text = "Tempature in Celsius")
     Templabel.place( x = 130 , y = 100)
     TempR = Label(top4, text = "0")
@@ -250,14 +273,7 @@ def TempD():
     
     top4.after(1000, TempC)
     # TempRH.set("00")
-# while temp > - 1: 
-#     if TempReading < int(set.temperature):
-#         RELAY_PIN = 17  
-#         relay = gpiozero.OutputDevice(RELAY_PIN, active_high = False, inital_value = False)
-#         relay.on()
-#         time.sleep(20)
-#         relay.off()
-#         print("Turn off relay")
+
 
 
 
@@ -323,9 +339,8 @@ def TimerD():
     secondEntry.place(x=180,y=20)
     MinsI = int(sets.time)
     temp = int(MinsI)*60 
-    
     while temp > -1:
-         
+        lock.aquire()
         # divmod(firstvalue = temp//60, secondvalue = temp%60)
         mins,secs = divmod(temp,60)
   
@@ -359,19 +374,32 @@ def TimerD():
         # after every one sec the value of temp will be decremented
         # by one
         temp -= 1
-
+        lock.release()
+def HeatPad(timeleft, TemperatureReading):
+    while timeleft > - 1: 
+        lock.acquire()
+        if (TemperatureReading < int(set.temperature)):
+            RELAY_PIN = 17  
+            relay = gpiozero.OutputDevice(RELAY_PIN, active_high = False, inital_value = False)
+            relay.on()
+            print("Turn of relay")
+            time.sleep(20)
+            relay.off()
+            print("Turn off relay")
+            lock.release()
 def RunIT(): 
-    global top4
+    global top4, lock
     top4 = Toplevel()
     top4.title(str(sets.name)+" Run")
     top4.geometry('600x600')
+    lock = threading.Lock()
 
     t1 = threading.Thread(target = TimerD)
-    t2 = threading.Thread(target = TempD)
-
+    t2 = threading.Thread(target = TempD, args = (temp, TempReading))
+    t3 = threading.Thread(target = HeatPad, args =(TempReading))
     t1.start()
     t2.start()
-
+    t3.start()
  #   t1.join()
  #   t2.join()
     #hour=StringVar()
