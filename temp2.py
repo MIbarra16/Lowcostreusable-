@@ -274,12 +274,6 @@ def TempD():
     top4.after(1000, TempC)
     # TempRH.set("00")
 
-
-
-
-    
-
-
    #os.system('modprobe w1-gpio')
    #os.system('modprobe w1-therm')
  
