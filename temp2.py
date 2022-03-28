@@ -11,7 +11,7 @@ import time
 from tkinter import messagebox
 import datetime 
 import sys
-import gpiozero
+import RPi.GPIO as GPIO
 import glob
 import csv 
 import numpy as np
@@ -370,12 +370,13 @@ def TimerD():
         sets.temp -= 1
         lock.release()
 def HeatPad():
-    global relay
+    global relay, RELAIS_1_GPIO
+    GPIO.setmode(GPIO.BCM) # GPIO Numbers instead of board numbers
     while sets.temp > - 1: 
         lock.acquire()
         if (sets.TempReading < int(sets.temperature)):
-            RELAY_PIN = 17  
-            relay = gpiozero.OutputDevice(RELAY_PIN, active_high = False, inital_value = False)
+            RELAIS_1_GPIO = 17 
+            GPIO.setup(RELAIS_1_GPIO, GPIO.OUT) # GPIO Assign mode
             RelayOn()          
             lock.release()
             top4.after(20000,RelayOff)
@@ -460,11 +461,11 @@ def RunIT():
      
     #
 def RelayOn():
-    relay.on()
+    GPIO.output(RELAIS_1_GPIO, GPIO.HIGH) # on
     print("Relay On")
 def RelayOff():
     relay.off()
-    print("Relay Off")
+    GPIO.output(RELAIS_1_GPIO, GPIO.LOW) # out
 #creating a label widget 
 root.title("Main Screen")
 root.geometry("600x600")
